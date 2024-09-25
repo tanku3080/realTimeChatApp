@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>簡易チャットアプリ</title>
+
+    <style>
+      /* メッセージリストのスタイルを指定 */
+      ul {
+      list-style-type: none;
+      margin: 0;
+      padding: 0;
+      }
+
+      /* 各メッセージのスタイルを指定 */
+      li {
+      padding: 8px;
+      margin-bottom: 10px;
+      background-color: #f1f1f1;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- メッセージが表示されるリスト -->
+    <ul id="messages"></ul>
+
+    <!-- メッセージを入力するフォーム -->
+    <form id="form" action="">
+      <!-- メッセージ入力欄、オートコンプリート無効 -->
+      <input id="input" autocomplete="off" />
+
+      <button>送信</button>
+    </form>
+
+    <!-- Socket.ioのライブラリを読み込む -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      // サーバーとのリアルタイム接続を確立
+      const socket = io();
+
+      // フォームと入力フィールドのDOM要素を取得
+      const form = document.getElementById('form');
+      const input = document.getElementById('input');
+
+      // フォームの送信イベントをリッスン
+      form.addEventListener('submit', (e) => {
+        e.preventDefault(); // デフォルトのフォーム送信動作を無効化
+        if (input.value) {
+          // 入力されたメッセージをサーバーに送信
+          socket.emit('chat message', input.value);
+          // 入力フィールドを空にする
+          input.value = '';
+        }
+      });
+
+      // サーバーから受信した「chat message」イベントを処理
+      socket.on('chat message', (msg) => {
+        // 新しいリストアイテムを作成し、メッセージを設定
+        const item = document.createElement('li');
+        item.textContent = msg;
+        // メッセージリストにアイテムを追加
+        document.getElementById('messages').appendChild(item);
+        // ページをスクロールして最新メッセージが見えるようにする
+        window.scrollTo(0, document.body.scrollHeight);
+      });
+    </script>
+  </body>
+</html>
